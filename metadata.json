@@ -1,0 +1,5 @@
+{
+  "name": "VRifle Vasen Generator",
+  "description": "Ein interaktiver 3D-Generator für Vasen mit STL-Export.",
+  "requestFramePermissions": []
+}
