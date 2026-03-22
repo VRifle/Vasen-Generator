@@ -282,9 +282,11 @@ function Slider({ label, value, min, max, step = 1, onChange }: { label: string,
 }
 
 function getPriceInfo(height: number) {
-  if (height <= 100) return { size: 'Klein (bis 10cm)', price: 19.90 };
-  if (height <= 160) return { size: 'Mittel (bis 16cm)', price: 29.90 };
-  return { size: 'Groß (bis 24cm)', price: 39.90 };
+  if (height <= 120) return { size: '90 - 120 mm', price: 14.90 };
+  if (height <= 150) return { size: '121 - 150 mm', price: 18.90 };
+  if (height <= 180) return { size: '151 - 180 mm', price: 22.90 };
+  if (height <= 210) return { size: '181 - 210 mm', price: 26.90 };
+  return { size: '211 - 240 mm', price: 29.90 };
 }
 
 export default function App() {
@@ -292,6 +294,7 @@ export default function App() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const [showCookieBanner, setShowCookieBanner] = useState(true);
+  const [showOrderModal, setShowOrderModal] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -533,17 +536,13 @@ export default function App() {
               inkl. MwSt.<br/>zzgl. Versand
             </div>
           </div>
-          <a 
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              alert("Hier kommt später der Link zum Webador-Artikel rein!");
-            }}
+          <button 
+            onClick={() => setShowOrderModal(true)}
             className="w-full py-3 px-4 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-medium flex items-center justify-center gap-2 transition-colors shadow-sm"
           >
             <ShoppingCart className="w-5 h-5" />
             Jetzt bestellen
-          </a>
+          </button>
           
           {isAdmin && (
             <button 
@@ -621,6 +620,48 @@ export default function App() {
           <Environment preset="city" />
         </Canvas>
       </div>
+
+      {/* Order Confirmation Modal */}
+      {showOrderModal && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden p-8 text-center animate-in fade-in zoom-in duration-300">
+            <div className="mx-auto w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
+              <Download className="w-8 h-8 text-emerald-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-zinc-900 mb-4">Fast geschafft!</h2>
+            <div className="text-zinc-600 space-y-4 mb-8 text-left">
+              <p>
+                Deine individuelle Vase wird nun als <strong>3D-Datei (STL)</strong> heruntergeladen.
+              </p>
+              <div className="bg-zinc-50 p-4 rounded-xl border border-zinc-100 italic">
+                "Bitte sende die gespeicherte STL-Datei über das Kontaktformular an VRifle, damit deine Bestellung schnellstmöglich abgeschlossen werden kann."
+              </div>
+              <p className="text-sm">
+                Nach dem Klick wirst du direkt zum Artikel im Shop weitergeleitet, um den Kauf abzuschließen.
+              </p>
+            </div>
+            <button 
+              onClick={() => {
+                exportSTL();
+                setShowOrderModal(false);
+                // Give the browser time to start the download before redirecting
+                setTimeout(() => {
+                  window.location.href = "https://www.vrifle-3d.de/product/22521527/deine-design-vase-individuell";
+                }, 1500);
+              }}
+              className="w-full py-4 px-6 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-bold text-lg shadow-lg transition-all active:scale-95"
+            >
+              Ich habe verstanden & Download
+            </button>
+            <button 
+              onClick={() => setShowOrderModal(false)}
+              className="mt-4 text-sm text-zinc-400 hover:text-zinc-600 transition-colors"
+            >
+              Abbrechen
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Cookie / Privacy Banner */}
       {showCookieBanner && (
