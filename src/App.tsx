@@ -1,10 +1,10 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, ThreeEvent } from '@react-three/fiber';
 import { OrbitControls, Environment, Grid, ContactShadows } from '@react-three/drei';
 import * as THREE from 'three';
 import { STLExporter } from 'three-stdlib';
 import { ZipWriter, BlobWriter, Uint8ArrayReader } from '@zip.js/zip.js';
-import { Download, Settings2, Info, Maximize, Minimize, X, ShieldCheck, ShoppingCart } from 'lucide-react';
+import { Download, Settings2, Info, Maximize, Minimize, X, ShieldCheck, ShoppingCart, MousePointer2 } from 'lucide-react';
 
 interface VaseParams {
   height: number;
@@ -30,6 +30,7 @@ interface VaseParams {
   textSize: number;
   textDepth: number;
   textHeightOffset: number;
+  textRotation: number;
 }
 
 function getShapeMultiplier(shape: string, theta: number): number {
@@ -51,7 +52,11 @@ function getShapeMultiplier(shape: string, theta: number): number {
   return Math.cos(Math.PI / n) / Math.cos(localTheta);
 }
 
-function VaseGeometry({ params, onMeshReady }: { params: VaseParams, onMeshReady: (mesh: THREE.Mesh) => void }) {
+function VaseGeometry({ params, onMeshReady, onPointSelect }: { 
+  params: VaseParams, 
+  onMeshReady: (mesh: THREE.Mesh) => void,
+  onPointSelect?: (heightOffset: number, rotation: number) => void
+}) {
   const meshRef = useRef<THREE.Mesh>(null);
 
   const geometry = useMemo(() => {
@@ -129,7 +134,7 @@ function VaseGeometry({ params, onMeshReady }: { params: VaseParams, onMeshReady
         ctx.font = `bold ${fontSize}px "${params.textFont}", sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.filter = 'blur(4px)';
+        ctx.filter = 'blur(1.5px)';
         const yPos = 2048 - (params.textHeightOffset / 100) * 2048;
         ctx.fillText(params.text, 1024, yPos);
         textImageData = ctx.getImageData(0, 0, 2048, 2048).data;
@@ -190,9 +195,9 @@ function VaseGeometry({ params, onMeshReady }: { params: VaseParams, onMeshReady
 
           let textDisplacement = 0;
           if (textImageData && params.textDepth !== 0) {
-            let u = 0.5 - (theta - Math.PI / 2) / (2 * Math.PI);
-            if (u < 0) u += 1;
-            if (u > 1) u -= 1;
+            let u = 0.5 - (theta - params.textRotation) / (2 * Math.PI);
+            while (u < 0) u += 1;
+            while (u > 1) u -= 1;
             
             let v = y / height;
             
@@ -231,7 +236,21 @@ function VaseGeometry({ params, onMeshReady }: { params: VaseParams, onMeshReady
   }, [geometry, onMeshReady]);
 
   return (
-    <mesh ref={meshRef} geometry={geometry} castShadow receiveShadow>
+    <mesh 
+      ref={meshRef} 
+      geometry={geometry} 
+      castShadow 
+      receiveShadow
+      onClick={(e: ThreeEvent<MouseEvent>) => {
+        if (onPointSelect && e.point) {
+          e.stopPropagation();
+          const y = e.point.y;
+          const heightOffset = (y / params.height) * 100;
+          const theta = Math.atan2(e.point.z, e.point.x);
+          onPointSelect(heightOffset, theta);
+        }
+      }}
+    >
       <meshPhysicalMaterial 
         color={params.color} 
         roughness={params.roughness} 
@@ -353,8 +372,8 @@ export default function App() {
     thickness: 3,
     baseShape: 'circle',
     lowPoly: false,
-    radialSegments: 128,
-    verticalSegments: 96,
+    radialSegments: 256,
+    verticalSegments: 128,
     pattern: 'none',
     patternDepth: 2,
     patternFrequency: 12,
@@ -366,6 +385,7 @@ export default function App() {
     textSize: 40,
     textDepth: 1.5,
     textHeightOffset: 50,
+    textRotation: Math.PI / 2,
   });
 
   const meshRef = useRef<THREE.Mesh | null>(null);
@@ -517,6 +537,13 @@ export default function App() {
             </div>
             {params.text && (
               <>
+                <div className="bg-emerald-50 border border-emerald-100 p-3 rounded-xl flex gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <MousePointer2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                  <p className="text-xs text-emerald-800 leading-relaxed">
+                    <strong>Tipp:</strong> Klicke einfach direkt auf die Vase in der 3D-Ansicht, um den Text zu platzieren! <br />
+                    <span className="opacity-75 italic">(Hinweis: Die Textqualität wird beim nächsten Update noch weiter verbessert.)</span>
+                  </p>
+                </div>
                 <Select 
                   label="Schriftart" 
                   value={params.textFont} 
@@ -609,7 +636,15 @@ export default function App() {
           />
           <directionalLight position={[-50, 50, -50]} intensity={0.5} />
           
-          <VaseGeometry params={params} onMeshReady={(mesh) => meshRef.current = mesh} />
+          <VaseGeometry 
+            params={params} 
+            onMeshReady={(mesh) => meshRef.current = mesh} 
+            onPointSelect={(h, r) => {
+              if (params.text) {
+                setParams(prev => ({ ...prev, textHeightOffset: h, textRotation: r }));
+              }
+            }}
+          />
           
           <ContactShadows 
             position={[0, 0, 0]} 
