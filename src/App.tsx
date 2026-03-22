@@ -3,6 +3,7 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment, Grid, ContactShadows } from '@react-three/drei';
 import * as THREE from 'three';
 import { STLExporter } from 'three-stdlib';
+import { ZipWriter, BlobWriter, Uint8ArrayReader } from '@zip.js/zip.js';
 import { Download, Settings2, Info, Maximize, Minimize, X, ShieldCheck, ShoppingCart } from 'lucide-react';
 
 interface VaseParams {
@@ -369,21 +370,37 @@ export default function App() {
 
   const meshRef = useRef<THREE.Mesh | null>(null);
 
-  const exportSTL = () => {
+  const exportSTL = async () => {
     if (!meshRef.current) return;
-    const exporter = new STLExporter();
-    // Use binary: true for much smaller file sizes (approx 5-10x smaller than ASCII)
-    const stlData = exporter.parse(meshRef.current, { binary: true });
-    const blob = new Blob([stlData], { type: 'application/octet-stream' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.style.display = 'none';
-    link.href = url;
-    link.download = 'vrifle_vase.stl';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    try {
+      const exporter = new STLExporter();
+      // Use binary: true for much smaller file sizes
+      const stlData = exporter.parse(meshRef.current, { binary: true });
+      
+      // Create ZIP with password
+      const zipWriter = new ZipWriter(new BlobWriter("application/zip"));
+      const stlArray = new Uint8Array(stlData instanceof DataView ? stlData.buffer : stlData as ArrayBuffer);
+      
+      await zipWriter.add("vrifle_vase.stl", new Uint8ArrayReader(stlArray), { 
+        password: "vriflevase",
+        zipCrypto: true // Better compatibility with standard OS extractors
+      });
+      
+      const zipBlob = await zipWriter.close();
+      const url = URL.createObjectURL(zipBlob);
+      
+      const link = document.createElement('a');
+      link.style.display = 'none';
+      link.href = url;
+      link.download = 'vrifle_vase.zip';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error creating ZIP:", error);
+      alert("Fehler beim Erstellen der ZIP-Datei. Bitte versuche es erneut.");
+    }
   };
 
   return (
@@ -547,11 +564,11 @@ export default function App() {
           
           {isAdmin && (
             <button 
-              onClick={exportSTL}
+              onClick={() => exportSTL()}
               className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium flex items-center justify-center gap-2 transition-colors shadow-sm mt-2"
             >
               <Download className="w-5 h-5" />
-              STL Herunterladen (Admin)
+              ZIP Herunterladen (Admin)
             </button>
           )}
         </div>
@@ -632,23 +649,23 @@ export default function App() {
             <h2 className="text-2xl font-bold text-zinc-900 mb-4">Fast geschafft!</h2>
             <div className="text-zinc-600 space-y-4 mb-8 text-left">
               <p>
-                Deine individuelle Vase wird nun als <strong>3D-Datei (STL)</strong> heruntergeladen.
+                Deine individuelle Vase wird nun als <strong>ZIP-Datei</strong> heruntergeladen.
               </p>
               <div className="bg-zinc-50 p-4 rounded-xl border border-zinc-100 italic">
-                "Bitte sende die gespeicherte STL-Datei über das Kontaktformular an VRifle, damit deine Bestellung schnellstmöglich abgeschlossen werden kann."
+                "Bitte sende die gespeicherte ZIP-Datei über das Kontaktformular an VRifle, damit deine Bestellung schnellstmöglich abgeschlossen werden kann."
               </div>
               <p className="text-sm">
                 Nach dem Klick wirst du direkt zum Artikel im Shop weitergeleitet, um den Kauf abzuschließen.
               </p>
             </div>
             <button 
-              onClick={() => {
-                exportSTL();
+              onClick={async () => {
+                await exportSTL();
                 setShowOrderModal(false);
                 // Give the browser time to start the download before redirecting
                 setTimeout(() => {
                   window.location.href = "https://www.vrifle-3d.de/product/22521527/deine-design-vase-individuell";
-                }, 1500);
+                }, 2000);
               }}
               className="w-full py-4 px-6 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-bold text-lg shadow-lg transition-all active:scale-95"
             >
