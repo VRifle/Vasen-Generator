@@ -352,8 +352,8 @@ export default function App() {
     thickness: 3,
     baseShape: 'circle',
     lowPoly: false,
-    radialSegments: 256,
-    verticalSegments: 128,
+    radialSegments: 128,
+    verticalSegments: 96,
     pattern: 'none',
     patternDepth: 2,
     patternFrequency: 12,
@@ -372,8 +372,9 @@ export default function App() {
   const exportSTL = () => {
     if (!meshRef.current) return;
     const exporter = new STLExporter();
-    const stlString = exporter.parse(meshRef.current);
-    const blob = new Blob([stlString], { type: 'text/plain' });
+    // Use binary: true for much smaller file sizes (approx 5-10x smaller than ASCII)
+    const stlData = exporter.parse(meshRef.current, { binary: true });
+    const blob = new Blob([stlData], { type: 'application/octet-stream' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.style.display = 'none';
