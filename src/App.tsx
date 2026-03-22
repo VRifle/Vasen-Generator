@@ -316,6 +316,7 @@ export default function App() {
   const [showCookieBanner, setShowCookieBanner] = useState(true);
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isOrdered, setIsOrdered] = useState(false);
 
   useEffect(() => {
     // Check URL for admin flag
@@ -425,6 +426,19 @@ export default function App() {
 
   return (
     <div ref={containerRef} className="flex flex-col md:flex-row h-screen w-full bg-zinc-50 text-zinc-900 font-sans overflow-hidden relative">
+      {isOrdered && (
+        <div className="fixed inset-0 z-[200] bg-zinc-200/60 backdrop-blur-[2px] flex items-center justify-center p-6 text-center">
+          <div className="bg-white p-8 rounded-2xl shadow-xl max-w-sm border border-zinc-200 animate-in fade-in zoom-in duration-500">
+            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ShieldCheck className="w-8 h-8 text-emerald-600" />
+            </div>
+            <h2 className="text-xl font-bold text-zinc-900 mb-2">Bestellung in Bearbeitung</h2>
+            <p className="text-sm text-zinc-600">
+              Vielen Dank! Deine Konfiguration wurde gespeichert. Bitte schließe den Kauf nun oben auf der Seite ab.
+            </p>
+          </div>
+        </div>
+      )}
       
       {/* Mobile Overlay */}
       {showControls && (
@@ -689,18 +703,13 @@ export default function App() {
               <div className="bg-zinc-50 p-4 rounded-xl border border-zinc-100 italic">
                 "Bitte sende die gespeicherte ZIP-Datei über das Kontaktformular an VRifle, damit deine Bestellung schnellstmöglich abgeschlossen werden kann."
               </div>
-              <p className="text-sm">
-                Nach dem Klick wirst du direkt zum Artikel im Shop weitergeleitet, um den Kauf abzuschließen.
-              </p>
             </div>
             <button 
               onClick={async () => {
                 await exportSTL();
                 setShowOrderModal(false);
-                // Give the browser time to start the download before redirecting
-                setTimeout(() => {
-                  window.location.href = "https://www.vrifle-3d.de/product/22521527/deine-design-vase-individuell";
-                }, 2000);
+                setIsOrdered(true);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               className="w-full py-4 px-6 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-bold text-lg shadow-lg transition-all active:scale-95"
             >
