@@ -413,7 +413,7 @@ export default function App() {
       const link = document.createElement('a');
       link.style.display = 'none';
       link.href = url;
-      link.download = 'vrifle_vase_bestellung.jpg';
+      link.download = 'vrifle_vase_bestellung.zip';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -698,13 +698,13 @@ export default function App() {
             <h2 className="text-2xl font-bold text-zinc-900 mb-4">Fast geschafft!</h2>
             <div className="text-zinc-600 space-y-4 mb-8 text-left">
               <p>
-                Deine individuelle Vase wird nun als <strong>Bestelldatei</strong> heruntergeladen.
+                Deine individuelle Vase wird nun als <strong>ZIP-Datei</strong> heruntergeladen.
               </p>
               <div className="bg-zinc-50 p-4 rounded-xl border border-zinc-100 italic text-sm">
-                "Wichtig: Die Datei hat die Endung <strong>.jpg</strong>, damit sie problemlos über das Kontaktformular gesendet werden kann. Bitte lade sie einfach so hoch, wie sie ist."
+                "Bitte sende die gespeicherte ZIP-Datei über das Kontaktformular an VRifle, damit deine Bestellung schnellstmöglich abgeschlossen werden kann."
               </div>
               <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100 text-sm">
-                Sende diese Datei nun über das Kontaktformular an VRifle, um deine Bestellung abzuschließen.
+                Sende diese Datei nun über dein Kontaktformular an uns, um deine Bestellung abzuschließen.
               </div>
             </div>
             <button 
