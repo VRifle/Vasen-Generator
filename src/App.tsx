@@ -443,8 +443,8 @@ export default function App() {
       {isOrdered && (
         <div className="fixed inset-0 z-[200] bg-zinc-200/60 backdrop-blur-[2px] flex items-center justify-center p-6 text-center">
           <div className="bg-white p-8 rounded-2xl shadow-xl max-w-sm border border-zinc-200 animate-in fade-in zoom-in duration-500">
-            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <ShieldCheck className="w-8 h-8 text-emerald-600" />
+            <div className="w-16 h-16 bg-[#1ccce6]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ShieldCheck className="w-8 h-8 text-[#1ccce6]" />
             </div>
             <h2 className="text-xl font-bold text-zinc-900 mb-2">Bestellung in Bearbeitung</h2>
             <p className="text-sm text-zinc-600">
@@ -565,9 +565,9 @@ export default function App() {
             </div>
             {params.text && (
               <>
-                <div className="bg-emerald-50 border border-emerald-100 p-3 rounded-xl flex gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                  <MousePointer2 className="w-5 h-5 text-emerald-600 shrink-0" />
-                  <p className="text-xs text-emerald-800 leading-relaxed">
+                <div className="bg-[#1ccce6]/5 border border-[#1ccce6]/20 p-3 rounded-xl flex gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <MousePointer2 className="w-5 h-5 text-[#1ccce6] shrink-0" />
+                  <p className="text-xs text-[#1ccce6] leading-relaxed font-medium">
                     <strong>Tipp:</strong> Klicke einfach direkt auf die Vase in der 3D-Ansicht, um den Text zu platzieren! <br />
                     <span className="opacity-75 italic">(Hinweis: Die Textqualität wird beim nächsten Update noch weiter verbessert.)</span>
                   </p>
@@ -613,14 +613,13 @@ export default function App() {
             onClick={() => setShowOrderModal(true)}
             className="w-full py-3 px-4 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-medium flex items-center justify-center gap-2 transition-colors shadow-sm"
           >
-            <ShoppingCart className="w-5 h-5" />
-            Jetzt bestellen
+            Design speichern & weiter
           </button>
           
           {isAdmin && (
             <button 
               onClick={() => exportSTL()}
-              className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium flex items-center justify-center gap-2 transition-colors shadow-sm mt-2"
+              className="w-full py-3 px-4 bg-[#1ccce6] hover:bg-[#1bbbd1] text-white rounded-xl font-medium flex items-center justify-center gap-2 transition-colors shadow-sm mt-2"
             >
               <Download className="w-5 h-5" />
               JPEG Herunterladen (Admin)
@@ -706,18 +705,15 @@ export default function App() {
       {showOrderModal && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden p-8 text-center animate-in fade-in zoom-in duration-300">
-            <div className="mx-auto w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
-              <Download className="w-8 h-8 text-emerald-600" />
+            <div className="mx-auto w-16 h-16 bg-[#1ccce6]/10 rounded-full flex items-center justify-center mb-6">
+              <Download className="w-8 h-8 text-[#1ccce6]" />
             </div>
             <h2 className="text-2xl font-bold text-zinc-900 mb-4">Fast geschafft!</h2>
             <div className="text-zinc-600 space-y-4 mb-8 text-left">
               <p>
                 Deine individuelle Vase wird nun als <strong>JPEG-Bild</strong> heruntergeladen.
               </p>
-              <div className="bg-zinc-50 p-4 rounded-xl border border-zinc-100 italic text-sm">
-                "Bitte sende das gespeicherte JPEG-Bild über das Kontaktformular an VRifle, damit deine Bestellung schnellstmöglich abgeschlossen werden kann."
-              </div>
-              <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100 text-sm">
+              <div className="bg-[#1ccce6]/5 p-4 rounded-xl border border-[#1ccce6]/20 text-sm">
                 Sende dieses Bild nun über dein Kontaktformular an uns, um deine Bestellung abzuschließen.
               </div>
             </div>
