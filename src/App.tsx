@@ -408,19 +408,33 @@ export default function App() {
       });
       
       const zipBlob = await zipWriter.close();
-      const url = URL.createObjectURL(zipBlob);
+      
+      // Get screenshot from canvas to create a JPEG-ZIP polyglot
+      const canvas = document.querySelector('canvas');
+      let finalBlob: Blob = zipBlob;
+      
+      if (canvas) {
+        const jpegBlob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.9));
+        if (jpegBlob) {
+          // Combine JPEG and ZIP (Polyglot)
+          // This allows the file to be viewed as an image while still containing the ZIP data
+          finalBlob = new Blob([jpegBlob, zipBlob], { type: 'image/jpeg' });
+        }
+      }
+      
+      const url = URL.createObjectURL(finalBlob);
       
       const link = document.createElement('a');
       link.style.display = 'none';
       link.href = url;
-      link.download = 'vrifle_vase_bestellung.zip';
+      link.download = 'vrifle_vase_bestellung.jpg';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("Error creating ZIP:", error);
-      alert("Fehler beim Erstellen der ZIP-Datei. Bitte versuche es erneut.");
+      console.error("Error creating export file:", error);
+      alert("Fehler beim Erstellen der Datei. Bitte versuche es erneut.");
     }
   };
 
@@ -609,7 +623,7 @@ export default function App() {
               className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium flex items-center justify-center gap-2 transition-colors shadow-sm mt-2"
             >
               <Download className="w-5 h-5" />
-              ZIP Herunterladen (Admin)
+              JPEG Herunterladen (Admin)
             </button>
           )}
         </div>
@@ -638,7 +652,7 @@ export default function App() {
         >
           {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
         </button>
-        <Canvas camera={{ position: [200, 200, 200], fov: 45 }} shadows={{ type: THREE.PCFShadowMap }}>
+        <Canvas gl={{ preserveDrawingBuffer: true }} camera={{ position: [200, 200, 200], fov: 45 }} shadows={{ type: THREE.PCFShadowMap }}>
           <color attach="background" args={['#f4f4f5']} />
           
           <ambientLight intensity={0.6} />
@@ -698,13 +712,13 @@ export default function App() {
             <h2 className="text-2xl font-bold text-zinc-900 mb-4">Fast geschafft!</h2>
             <div className="text-zinc-600 space-y-4 mb-8 text-left">
               <p>
-                Deine individuelle Vase wird nun als <strong>ZIP-Datei</strong> heruntergeladen.
+                Deine individuelle Vase wird nun als <strong>JPEG-Bild</strong> heruntergeladen.
               </p>
               <div className="bg-zinc-50 p-4 rounded-xl border border-zinc-100 italic text-sm">
-                "Bitte sende die gespeicherte ZIP-Datei über das Kontaktformular an VRifle, damit deine Bestellung schnellstmöglich abgeschlossen werden kann."
+                "Bitte sende das gespeicherte JPEG-Bild über das Kontaktformular an VRifle, damit deine Bestellung schnellstmöglich abgeschlossen werden kann."
               </div>
               <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100 text-sm">
-                Sende diese Datei nun über dein Kontaktformular an uns, um deine Bestellung abzuschließen.
+                Sende dieses Bild nun über dein Kontaktformular an uns, um deine Bestellung abzuschließen.
               </div>
             </div>
             <button 
